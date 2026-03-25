@@ -66,10 +66,10 @@ export default function ResetApp() {
 
   const navItems = [
     ...(selectedRoutineId && !isRestDay
-      ? [{ id: 'today', shortName: '오늘' }]
+      ? [{ id: 'today', shortName: '오늘', count: todayVideos.length }]
       : []),
-    ...categories.map(c => ({ id: c.id, shortName: c.shortName })),
-    { id: 'all', shortName: '전체' },
+    ...categories.map(c => ({ id: c.id, shortName: c.shortName, count: videos.filter(v => v.category === c.id).length })),
+    { id: 'all', shortName: '전체', count: videos.length },
   ];
 
   return (
@@ -90,7 +90,7 @@ export default function ResetApp() {
               <button
                 key={item.id}
                 onClick={() => setSelectedCategory(item.id)}
-                className={`relative w-full text-left px-3 py-3 text-[11px] leading-snug tracking-wide transition-all ${
+                className={`relative w-full text-left px-3 py-2.5 text-[11px] leading-snug tracking-wide transition-all ${
                   selectedCategory === item.id
                     ? 'text-green-800 font-semibold bg-green-50'
                     : 'text-stone-400 active:bg-stone-50'
@@ -99,14 +99,19 @@ export default function ResetApp() {
                 {selectedCategory === item.id && (
                   <span className="absolute left-0 top-2 bottom-2 w-0.5 bg-green-700 rounded-r-full" />
                 )}
-                {item.shortName}
+                <span className="block">{item.shortName}</span>
+                <span className="block text-[9px] mt-0.5 text-stone-300">{item.count}</span>
               </button>
             ))}
           </div>
           {/* Routine button */}
           <button
             onClick={() => setShowRoutineModal(true)}
-            className="flex-shrink-0 w-full border-t border-stone-100 px-2 py-3 text-[10px] text-stone-400 tracking-wide text-center active:bg-stone-50 leading-snug"
+            className={`flex-shrink-0 w-full border-t px-2 py-3 text-[10px] tracking-wide text-center leading-snug transition-all ${
+              !selectedRoutineId
+                ? 'border-green-200 bg-green-50 text-green-700 font-semibold'
+                : 'border-stone-100 text-stone-400 active:bg-stone-50'
+            }`}
           >
             {selectedRoutineId ? '루틴\n변경' : '루틴\n선택'}
           </button>
@@ -115,25 +120,27 @@ export default function ResetApp() {
         {/* Swipe carousel area */}
         <main className="flex-1 overflow-hidden flex flex-col py-3">
 
-          {/* Today shortcut chip */}
-          {selectedRoutineId && !isRestDay && (
-            <div className="px-3 mb-3 flex-shrink-0">
-              <button
-                onClick={() => setSelectedCategory('today')}
-                className={`text-xs px-4 py-2 rounded-xl font-medium transition-colors tracking-wide ${
-                  selectedCategory === 'today'
-                    ? 'bg-green-700 text-white'
-                    : 'bg-green-50 text-green-700 border border-green-200'
-                }`}
-              >
-                오늘의 흐름 ({todayVideos.length}개)
-              </button>
-            </div>
-          )}
-
+          {/* Empty state */}
           {filteredVideos.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center text-stone-300 text-sm tracking-wide">
-              동작이 없어요
+            <div className="flex-1 flex flex-col items-center justify-center px-6 text-center gap-3">
+              {!selectedRoutineId ? (
+                <>
+                  <p className="text-stone-600 text-sm font-medium tracking-wide">루틴을 먼저 선택해주세요</p>
+                  <p className="text-stone-400 text-xs tracking-wide leading-relaxed">
+                    좌측 하단 <span className="text-green-700 font-semibold">루틴 선택</span> 버튼을 눌러<br/>오늘 할 동작을 설정해보세요
+                  </p>
+                  <button
+                    onClick={() => setShowRoutineModal(true)}
+                    className="mt-1 px-6 py-2.5 bg-green-700 text-white text-xs rounded-2xl font-medium tracking-wide"
+                  >
+                    루틴 선택하기
+                  </button>
+                </>
+              ) : isRestDay ? (
+                <p className="text-stone-300 text-sm tracking-wide">오늘은 휴식일이에요</p>
+              ) : (
+                <p className="text-stone-300 text-sm tracking-wide">동작이 없어요</p>
+              )}
             </div>
           ) : (
             <>
