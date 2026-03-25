@@ -95,6 +95,18 @@ export default function ResetApp() {
     });
   };
 
+  const checkAll = (ids: number[]) => {
+    setHistory(prev => {
+      const todayList = [...(prev[todayKey] ?? [])];
+      const allChecked = ids.every(id => todayList.includes(id));
+      const next = allChecked
+        ? { ...prev, [todayKey]: todayList.filter(id => !ids.includes(id)) }
+        : { ...prev, [todayKey]: [...new Set([...todayList, ...ids])] };
+      localStorage.setItem('reset-history', JSON.stringify(next));
+      return next;
+    });
+  };
+
   const selectRoutine = (id: string) => {
     setSelectedRoutineId(id);
     localStorage.setItem('reset-routine', id);
@@ -218,41 +230,69 @@ export default function ResetApp() {
         <main className="flex-1 overflow-hidden flex flex-col py-3">
 
           {/* 카드 위 정보 */}
-          {filteredVideos.length > 0 && (
-            <div className="px-4 mb-2 flex-shrink-0">
-              {selectedCategory === 'today' && currentRoutine && (
-                <>
-                  <p className="text-[10px] tracking-widest uppercase mb-1" style={{ color: '#64748B' }}>
-                    {currentRoutine.name} · {todayCategoryIds.map(id => categories.find(c => c.id === id)?.shortName).join(', ')}
-                  </p>
-                  <div className="flex items-center justify-between mb-1.5">
+          {filteredVideos.length > 0 && (() => {
+            const filteredIds = filteredVideos.map(v => v.id);
+            const allChecked = filteredIds.every(id => checkedToday.has(id));
+            return (
+              <div className="px-4 mb-2 flex-shrink-0">
+                {selectedCategory === 'today' && currentRoutine && (
+                  <>
+                    <p className="text-[10px] tracking-widest uppercase mb-1" style={{ color: '#64748B' }}>
+                      {currentRoutine.name} · {todayCategoryIds.map(id => categories.find(c => c.id === id)?.shortName).join(', ')}
+                    </p>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <p className="text-xs font-semibold tracking-wide" style={{ color: '#0F172A' }}>
+                        오늘 루틴 영상 {filteredVideos.length}개
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs tracking-wide" style={{ color: '#64748B' }}>
+                          {todayCheckedCount}/{todayVideos.length} 완료
+                        </p>
+                        <button
+                          onClick={() => checkAll(filteredIds)}
+                          className="text-[10px] font-semibold px-2 py-0.5 rounded-full border transition-all"
+                          style={allChecked
+                            ? { borderColor: '#6366F1', color: '#6366F1', background: '#EEF2FF' }
+                            : { borderColor: '#CBD5E1', color: '#64748B', background: 'transparent' }
+                          }
+                        >
+                          {allChecked ? '전체 해제' : '전체 체크'}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="w-full rounded-full h-0.5" style={{ background: '#E2E8F0' }}>
+                      <div
+                        className="h-0.5 rounded-full transition-all duration-500"
+                        style={{
+                          width: todayVideos.length ? `${(todayCheckedCount / todayVideos.length) * 100}%` : '0%',
+                          background: '#6366F1'
+                        }}
+                      />
+                    </div>
+                  </>
+                )}
+                {selectedCategory !== 'today' && (
+                  <div className="flex items-center justify-between">
                     <p className="text-xs font-semibold tracking-wide" style={{ color: '#0F172A' }}>
-                      오늘 루틴 영상 {filteredVideos.length}개
+                      {selectedCategory === 'all'
+                        ? `전체 영상 ${filteredVideos.length}개`
+                        : `${categories.find(c => c.id === selectedCategory)?.shortName} 영상 ${filteredVideos.length}개`}
                     </p>
-                    <p className="text-xs tracking-wide" style={{ color: '#64748B' }}>
-                      {todayCheckedCount}/{todayVideos.length} 완료
-                    </p>
+                    <button
+                      onClick={() => checkAll(filteredIds)}
+                      className="text-[10px] font-semibold px-2 py-0.5 rounded-full border transition-all"
+                      style={allChecked
+                        ? { borderColor: '#6366F1', color: '#6366F1', background: '#EEF2FF' }
+                        : { borderColor: '#CBD5E1', color: '#64748B', background: 'transparent' }
+                      }
+                    >
+                      {allChecked ? '전체 해제' : '전체 체크'}
+                    </button>
                   </div>
-                  <div className="w-full rounded-full h-0.5" style={{ background: '#E2E8F0' }}>
-                    <div
-                      className="h-0.5 rounded-full transition-all duration-500"
-                      style={{
-                        width: todayVideos.length ? `${(todayCheckedCount / todayVideos.length) * 100}%` : '0%',
-                        background: '#6366F1'
-                      }}
-                    />
-                  </div>
-                </>
-              )}
-              {selectedCategory !== 'today' && (
-                <p className="text-xs font-semibold tracking-wide" style={{ color: '#0F172A' }}>
-                  {selectedCategory === 'all'
-                    ? `전체 영상 ${filteredVideos.length}개`
-                    : `${categories.find(c => c.id === selectedCategory)?.shortName} 영상 ${filteredVideos.length}개`}
-                </p>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            );
+          })()}
 
           {/* Empty state */}
           {filteredVideos.length === 0 ? (
