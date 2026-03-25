@@ -158,10 +158,7 @@ export default function ResetApp() {
             <p className="text-xs tracking-widest uppercase mb-1" style={{ color: '#9C8B79' }}>
               {getDateLabel()}
             </p>
-            <h1 className="text-xl font-bold leading-tight" style={{ color: '#1E2318' }}>
-              {getGreeting()}
-            </h1>
-            <p className="text-sm mt-0.5 font-medium" style={{ color: '#4A5C34' }}>상체 리셋</p>
+            <h1 className="text-lg font-bold leading-tight" style={{ color: '#1E2318' }}>상체 리셋</h1>
           </div>
           <div className="flex items-center gap-2 pt-1">
             {streak > 0 && (
