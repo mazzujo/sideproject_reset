@@ -99,8 +99,7 @@ export default function ResetApp() {
                 {selectedCategory === item.id && (
                   <span className="absolute left-0 top-2 bottom-2 w-0.5 bg-green-700 rounded-r-full" />
                 )}
-                <span className="block">{item.shortName}</span>
-                <span className="block text-[9px] mt-0.5 text-stone-300">{item.count}</span>
+                {item.shortName}
               </button>
             ))}
           </div>
@@ -119,6 +118,27 @@ export default function ResetApp() {
 
         {/* Swipe carousel area */}
         <main className="flex-1 overflow-hidden flex flex-col py-3">
+
+          {/* 카드 위 영상 수량 + 오늘 루틴 요약 */}
+          {filteredVideos.length > 0 && (
+            <div className="px-4 mb-2 flex-shrink-0">
+              {/* 오늘 탭: 루틴 요약 */}
+              {selectedCategory === 'today' && currentRoutine && (
+                <p className="text-[11px] text-stone-400 tracking-wide mb-1">
+                  {currentRoutine.name} —{' '}
+                  {todayCategoryIds.map(id => categories.find(c => c.id === id)?.name).join(', ')}
+                </p>
+              )}
+              {/* 영상 개수 */}
+              <p className="text-xs font-medium text-stone-600 tracking-wide">
+                {selectedCategory === 'today'
+                  ? `오늘 루틴 영상 ${filteredVideos.length}개`
+                  : selectedCategory === 'all'
+                  ? `전체 영상 ${filteredVideos.length}개`
+                  : `${categories.find(c => c.id === selectedCategory)?.shortName} 영상 ${filteredVideos.length}개`}
+              </p>
+            </div>
+          )}
 
           {/* Empty state */}
           {filteredVideos.length === 0 ? (
